@@ -1,0 +1,169 @@
+Sub BuyingScenario()
+
+' Perform calculations for buying scenario
+
+' Defining the formulas for first month
+
+    Range("B22").Formula = "=B4"
+    Range("B23").Formula = "=B4-B6"
+    Range("B24").Formula = "=B6"
+
+    Range("C22").Formula = "=B22*(1+$B$12/12)"
+    Range("C23").Formula = "=B23-C27"
+    Range("C24").Formula = "=C22-C23"
+    Range("C25").Formula = "=B23*$B$7/12"
+    Range("C26").Formula = "=$B$15"
+    Range("C27").Formula = "=C26-C25"
+    Range("C28").Formula = "=$B$11/12"
+    Range("C29").Formula = "=$B$10/12"
+    Range("C30").Formula = "=$B$9*B22/12"
+    Range("C31").Formula = "=(C25+C30)*$B$13"
+    Range("C32").Formula = "=C26+C28+C29+C30-C31"
+
+'Declaring variables to propogate the formula mentioned for the first month till the end of amortization month
+
+Dim i As Integer
+Dim totalTime As Integer, col As String
+
+totalTime = Cells(8, 2).Value       'takes in the value mentioned for Principal amortization years
+totalTime = totalTime * 12          'converts the Principal amortization years to months
+col = NumberToColumn(totalTime + 2) 'adding 2 to the columns as we need to start populating data using formulas from column C
+
+' This for loop applies the below formula from row 22 till row 32
+' Range("C22:MX22").Formula = Range("C22").Formula
+
+For i = 22 To 32
+    Call LoopColumns(Range("C" & i), i, col)
+Next i
+
+End Sub
+
+Sub RentingScenario()
+
+' Perform calculations for renting scenario
+
+' Defining the formulas for first month
+
+    Range("B37").Formula = "=B16"
+    Range("B38").Formula = "=B24"
+
+    Range("C36").Formula = "=C32"
+    Range("C37").Formula = "=(1+$B$17/12)*B37"
+    Range("C38").Formula = "=B38*(1+$B$18/12)+C36-C37"
+    
+'Declaring variables to propogate the formula mentioned for the first month till the end of amortization month
+
+Dim i As Integer
+Dim totalTime As Integer, col As String
+
+totalTime = Cells(8, 2).Value
+totalTime = totalTime * 12
+col = NumberToColumn(totalTime + 2)
+For i = 36 To 38
+    Call LoopColumns(Range("C" & i), i, col)
+Next i
+
+End Sub
+
+Sub Decision_message()
+
+    Dim sumRange As Range
+    Dim total As Double
+    'Dim break_even_benefit As Double
+    'Dim curr_benefit_val As Double
+    'Dim targetValue As Double
+
+   
+    Set sumRange = Range("C25:MX25") 'range you want to sum to get total interest paid
+    Set avgrentRange = Range("C37:MX37") 'range you want to avg to get average rent paid per month
+    'Set changingCell = Range("B45")
+    
+    total_interest = Application.WorksheetFunction.sum(sumRange)
+    pmt_val = Range("Monthly_mortage_payment").Value
+    avg_rent = Application.WorksheetFunction.Average(avgrentRange)
+    home_equity = Range("B41").Value
+    rent_Savings = Range("B44").Value
+    
+    'to compute the breakeven interest rate
+    'targetValue = 0
+    'curr_benefit_val = Range("B45").Value
+    'Range("B7").GoalSeek Goal:=targetValue, changingCell:=changingCell
+    'break_even_benefit = Range("B45").Value
+    'Range("B45").Value = curr_benefit_val
+
+   
+    If Range("B45").Value < 0 Then
+        MsgBox "The recommendation is to rent a house in the selected Zipcode than buying a house is based on the following figures:" & vbCrLf & _
+                "Equity of home after 10 years is " & Format(home_equity, "Currency") & vbCrLf & _
+                "Savings after 10 years if the home is rented " & Format(rent_Savings, "Currency") & vbCrLf & _
+                "Average Monthly Rent is " & Format(avg_rent, "Currency"), , "Decision Dialog Box"
+                 
+    Else
+        MsgBox "The recommendation is to buy a house in the selected Zipcode than renting is based on the following figures:" & vbCrLf & _
+                "Equity of home after 10 years is " & Format(home_equity, "Currency") & vbCrLf & _
+                "Savings after 10 years if the home is rented " & Format(rent_Savings, "Currency") & vbCrLf & _
+                "The Monthly Mortgage payment for owning a home is " & Format(pmt_val, "Currency") & vbCrLf & _
+                "The total interest you will pay is " & Format(total_interest, "Currency"), , "Decision Dialog Box"
+    End If
+End Sub
+
+Sub ClearContents()
+
+
+Range("B22:MX32").ClearContents
+Range("B36:MX38").ClearContents
+
+End Sub
+
+' LoopColumns takes in 3 input parameters
+' 1. cell range which is formula mentioned for the first month
+' 2. row num to which the formula needs to be applied
+' 3. column number to indicate till how many columns does the formula needs to be applied
+
+Sub LoopColumns(cellFormula As Range, rownum As Integer, col As String)
+
+Range("C" & rownum & ":" & col & rownum).Formula = cellFormula.Formula
+
+' Ex : Range("C22:MX22").Formula = Range("C22").Formula
+
+End Sub
+
+' The function NumberToColumn takes in a number as input and provides the corresponding column name
+' Usage : NumberToColumn(362) will return MX
+
+Function NumberToColumn(ByVal colNumber As Integer) As String
+    
+    NumberToColumn = Cells(1, colNumber).Address(False, False)  ' Returns the address of the current cell - Ex: Cells(1, 362).Address(False, False) will return MX1
+    
+    NumberToColumn = Left(NumberToColumn, Len(NumberToColumn) - 1) ' Returns the column name
+    
+End Function
+
+Sub ShowCleanData()
+Sheets("Combine").Activate
+End Sub
+
+Sub Showhomevalues()
+Sheets("Buying_Price").Activate
+End Sub
+
+Sub Showrentingvalues()
+Sheets("Rental_Price").Activate
+End Sub
+
+Sub ShowDecision_zipcode()
+Sheets("Based_on_zipcodes").Activate
+End Sub
+
+Sub ShowVisualization()
+Sheets("Housing Prices_Dashboard").Activate
+End Sub
+
+Sub ShowDecision_custom()
+Sheets("User_inputs_based").Activate
+End Sub
+
+Sub ShowUserForm()
+Sheets("User Form").Activate
+End Sub
+
